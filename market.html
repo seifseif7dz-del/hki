@@ -2,63 +2,40 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>مكتبة التطبيقات</title>
     <style>
-        body { font-family: Arial, sans-serif; background: #f4f4f4; text-align: center; padding: 20px; margin: 0; }
-        h1 { color: #333; margin-bottom: 20px; }
-        .container { display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; max-width: 1200px; margin: auto; }
-        .app-card {
-            background: white; padding: 15px; width: 220px;
-            border-radius: 12px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-            transition: 0.3s;
-        }
-        .app-card:hover { transform: translateY(-5px); box-shadow: 0 8px 16px rgba(0,0,0,0.2); }
+        body { font-family: Arial; background: #f4f4f4; text-align: center; padding: 20px; }
+        .container { display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; }
+        .app-card { background: white; padding: 15px; width: 220px; border-radius: 12px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
         .app-card img { width: 80px; height: 80px; object-fit: contain; }
-        .app-card h3 { margin: 10px 0 5px; font-size: 18px; }
-        .app-card p { color: #666; font-size: 14px; height: 50px; overflow: hidden; }
-        .app-card a {
-            display: block; margin-top: 10px; padding: 8px;
-            background: #007bff; color: white; text-decoration: none;
-            border-radius: 20px;
-        }
-        .app-card a:hover { background: #0056b3; }
-        .admin-btn {
-            position: fixed; bottom: 20px; right: 20px;
-            background: #28a745; color: white; padding: 12px 20px;
-            border-radius: 30px; text-decoration: none; box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-        }
-        .admin-btn:hover { background: #218838; }
+        .app-card a { display: block; margin-top: 10px; padding: 8px; background: #007bff; color: white; text-decoration: none; border-radius: 20px; }
+        .admin-btn { position: fixed; bottom: 20px; right: 20px; background: #28a745; color: white; padding: 12px 20px; border-radius: 30px; text-decoration: none; }
     </style>
 </head>
 <body>
-
 <h1>📦 مكتبة التطبيقات</h1>
 <div id="app-container" class="container"></div>
-
 <a href="admin.html" class="admin-btn">🔧 لوحة التحكم</a>
 
 <script>
-    // 🔴 الرابط الخاص بـ JSONBin (تم وضعه لك)
-    const BIN_URL = "https://api.jsonbin.io/v3/b/6a529722f5f4af5e2981d9f7";
+    // 🔴 الرابط الذي أخذته من jsonkeeper
+    const BIN_URL = "https://jsonkeeper.com/b/MR0JT";
     
     fetch(BIN_URL)
         .then(res => res.json())
         .then(data => {
-            // جلب التطبيقات من داخل الملف
-            const apps = data.record.apps || [];
+            const apps = data.apps || [];
             const container = document.getElementById('app-container');
-            
             if (apps.length === 0) {
-                container.innerHTML = '<p style="color: #666; padding: 20px;">📭 لا توجد تطبيقات حالياً. أضف تطبيقاً من لوحة التحكم.</p>';
+                container.innerHTML = '<p>لا توجد تطبيقات حالياً.</p>';
             } else {
                 apps.forEach(app => {
                     const card = document.createElement('div');
                     card.className = 'app-card';
                     card.innerHTML = `
-                        <img src="${app.image}" alt="${app.name}" onerror="this.src='https://via.placeholder.com/80x80?text=App'">
+                        <img src="${app.image}" onerror="this.src='https://via.placeholder.com/80'">
                         <h3>${app.name}</h3>
-                        <p style="color: #666; font-size: 14px; height: 50px; overflow: hidden;">${app.desc}</p>
+                        <p>${app.desc}</p>
                         <a href="${app.link}" target="_blank">تحميل</a>
                     `;
                     container.appendChild(card);
@@ -66,9 +43,8 @@
             }
         })
         .catch(() => {
-            document.getElementById('app-container').innerHTML = '<p style="color:red;">⚠️ خطأ في الاتصال بالسحابة</p>';
+            document.getElementById('app-container').innerHTML = '<p style="color:red;">⚠️ خطأ في التحميل</p>';
         });
 </script>
-
 </body>
 </html>
