@@ -2,7 +2,6 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>لوحة التحكم</title>
     <style>
         body { font-family: Arial; text-align: center; padding: 20px; background: #e9ecef; }
@@ -11,7 +10,6 @@
         button { padding: 12px 24px; background: #28a745; color: white; border: none; border-radius: 6px; cursor: pointer; }
         #loginBox { display: block; }
         #adminPanel { display: none; }
-        #statusMsg { margin-top: 10px; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -24,24 +22,21 @@
 </div>
 
 <div id="adminPanel" class="container">
-    <h2>🔧 إضافة تطبيق جديد</h2>
+    <h2>🔧 إضافة تطبيق</h2>
     <form id="appForm">
         <input type="text" id="appName" placeholder="اسم التطبيق" required>
         <input type="text" id="appImage" placeholder="رابط الصورة" required>
         <input type="text" id="appLink" placeholder="رابط التحميل" required>
         <textarea id="appDesc" placeholder="وصف التطبيق" rows="3" required></textarea>
-        <button type="submit">➕ إضافة التطبيق</button>
+        <button type="submit">➕ إضافة</button>
     </form>
     <p id="statusMsg"></p>
 </div>
 
 <script>
-    // 🔑 كلمة السر
     const PASSWORD = "admin123";
-
-    // 🔴 الرابط والمفتاح الخاص بـ JSONBin (تم وضعهما لك)
-    const BIN_URL = "https://api.jsonbin.io/v3/b/6a529722f5f4af5e2981d9f7";
-    const MASTER_KEY = "$2a$10$C7krYp89.bjcE1rrn9Et9OJVNxe.kWMf71Sc5RYq89Urw3yYb4I0y";
+    // 🔴 نفس الرابط
+    const BIN_URL = "https://jsonkeeper.com/b/MR0JT";
 
     function checkPassword() {
         if (document.getElementById('passwordInput').value === PASSWORD) {
@@ -54,9 +49,7 @@
 
     document.getElementById('appForm').addEventListener('submit', function(e) {
         e.preventDefault();
-        const status = document.getElementById('statusMsg');
-        status.style.color = "blue";
-        status.innerHTML = "⏳ جاري الحفظ في السحابة...";
+        document.getElementById('statusMsg').innerHTML = "⏳ جاري الحفظ...";
         
         const newApp = {
             name: document.getElementById('appName').value,
@@ -65,34 +58,27 @@
             desc: document.getElementById('appDesc').value
         };
 
-        // 1. جلب التطبيقات الحالية
         fetch(BIN_URL)
             .then(res => res.json())
             .then(data => {
-                let apps = data.record.apps || [];
+                let apps = data.apps || [];
                 apps.push(newApp);
-                
-                // 2. رفع القائمة الجديدة
                 return fetch(BIN_URL, {
                     method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-Master-Key': MASTER_KEY
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ apps: apps })
                 });
             })
             .then(() => {
-                status.style.color = "green";
-                status.innerHTML = "✅ تم الحفظ! التطبيق سيظهر للجميع فوراً.";
+                document.getElementById('statusMsg').style.color = "green";
+                document.getElementById('statusMsg').innerHTML = "✅ تم الحفظ! سيظهر للجميع.";
                 document.getElementById('appForm').reset();
             })
             .catch(() => {
-                status.style.color = "red";
-                status.innerHTML = "❌ فشل الحفظ. تحقق من اتصالك بالإنترنت.";
+                document.getElementById('statusMsg').style.color = "red";
+                document.getElementById('statusMsg').innerHTML = "❌ خطأ.";
             });
     });
 </script>
-
 </body>
 </html>
