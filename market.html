@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>مكتبة التطبيقات</title>
+    <style>
+        body { font-family: Arial; text-align: center; }
+        .app { border: 1px solid #ccc; padding: 10px; margin: 10px; display: inline-block; width: 200px; }
+        img { width: 50px; height: 50px; }
+    </style>
+</head>
+<body>
+    <h1>📦 التطبيقات</h1>
+    <div id="apps"></div>
+
+    <script>
+        fetch('apps.json')
+            .then(res => res.json())
+            .then(data => {
+                data.forEach(app => {
+                    document.getElementById('apps').innerHTML += `
+                        <div class="app">
+                            <img src="${app.image}" onerror="this.src='https://via.placeholder.com/50'">
+                            <h3>${app.name}</h3>
+                            <p>${app.desc}</p>
+                            <a href="${app.link}" target="_blank">تحميل</a>
+                        </div>
+                    `;
+                });
+            });
+    </script>
+</body>
+</html>

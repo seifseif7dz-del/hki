@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>لوحة التحكم</title>
+    <style>
+        body { font-family: Arial; text-align: center; padding: 20px; background: #e9ecef; }
+        .container { max-width: 500px; margin: auto; background: white; padding: 30px; border-radius: 12px; }
+        input, textarea { width: 100%; padding: 10px; margin: 8px 0; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
+        button { padding: 12px 24px; background: #28a745; color: white; border: none; border-radius: 6px; cursor: pointer; }
+        .back-link { display: block; margin-top: 20px; color: #007bff; text-decoration: none; }
+        #loginBox { display: block; }
+        #adminPanel { display: none; }
+    </style>
+</head>
+<body>
+
+<!-- 🔐 شاشة تسجيل الدخول -->
+<div id="loginBox" class="container">
+    <h2>🔐 تسجيل الدخول</h2>
+    <input type="password" id="passwordInput" placeholder="أدخل كلمة السر">
+    <button onclick="checkPassword()">دخول</button>
+    <p id="errorMsg" style="color: red; display: none;">❌ كلمة السر خطأ</p>
+</div>
+
+<!-- 🔧 لوحة التحكم (مخفية) -->
+<div id="adminPanel" class="container">
+    <h2>🔧 لوحة التحكم</h2>
+    <form id="appForm">
+        <input type="text" id="appName" placeholder="اسم التطبيق" required>
+        <input type="text" id="appImage" placeholder="رابط الصورة" required>
+        <input type="text" id="appLink" placeholder="رابط التحميل" required>
+        <textarea id="appDesc" placeholder="وصف التطبيق" rows="3" required></textarea>
+        <button type="submit">➕ إضافة التطبيق</button>
+    </form>
+    <a href="index.html" class="back-link">🏠 العودة إلى الموقع</a>
+</div>
+
+<script>
+    // 🔑 كلمة السر المطلوبة (عدلها إلى ما تريد)
+    const PASSWORD = "admin123";
+
+    function checkPassword() {
+        const input = document.getElementById('passwordInput').value;
+        if (input === PASSWORD) {
+            document.getElementById('loginBox').style.display = 'none';
+            document.getElementById('adminPanel').style.display = 'block';
+        } else {
+            document.getElementById('errorMsg').style.display = 'block';
+        }
+    }
+
+    // إضافة التطبيقات (نفس الكود السابق)
+    let apps = [];
+    fetch('apps.json')
+        .then(res => res.json())
+        .then(data => { apps = data; })
+        .catch(() => { apps = []; });
+
+    document.getElementById('appForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const newApp = {
+            name: document.getElementById('appName').value,
+            image: document.getElementById('appImage').value,
+            link: document.getElementById('appLink').value,
+            desc: document.getElementById('appDesc').value
+        };
+        apps.push(newApp);
+        const dataStr = JSON.stringify(apps, null, 2);
+        const blob = new Blob([dataStr], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'apps.json';
+        a.click();
+        URL.revokeObjectURL(url);
+        alert('✅ تم إضافة التطبيق! تم تنزيل ملف apps.json الجديد.');
+        this.reset();
+    });
+</script>
+
+</body>
+</html>
