@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>لوحة التحكم</title>
+    <title>لوحة التحكم (تلقائي)</title>
     <style>
         body { font-family: Arial; text-align: center; padding: 20px; background: #e9ecef; }
         .container { max-width: 500px; margin: auto; background: white; padding: 30px; border-radius: 12px; }
@@ -23,42 +23,57 @@
     <p id="errorMsg" style="color: red; display: none;">❌ كلمة السر خطأ</p>
 </div>
 
-<!-- 🔧 لوحة التحكم (مخفية) -->
+<!-- 🔧 لوحة التحكم -->
 <div id="adminPanel" class="container">
-    <h2>🔧 لوحة التحكم</h2>
+    <h2>🔧 لوحة التحكم (إضافة فورية)</h2>
     <form id="appForm">
         <input type="text" id="appName" placeholder="اسم التطبيق" required>
         <input type="text" id="appImage" placeholder="رابط الصورة" required>
         <input type="text" id="appLink" placeholder="رابط التحميل" required>
         <textarea id="appDesc" placeholder="وصف التطبيق" rows="3" required></textarea>
-        <button type="submit">➕ إضافة التطبيق</button>
+        <button type="submit">➕ إضافة التطبيق (سيظهر فوراً)</button>
     </form>
-    <a href="index.html" class="back-link">🏠 العودة إلى الموقع</a>
+    
+    <h3>📋 التطبيقات الحالية (مخزنة في المتصفح)</h3>
+    <div id="appList" style="text-align: right; background: #f8f9fa; padding: 10px; border-radius: 6px;"></div>
+
+    <a href="https://seifseif7dz-del.github.io/hki/market.html" target="_blank" class="back-link">🏠 العودة للموقع</a>
 </div>
 
 <script>
-    // 🔑 كلمة السر المطلوبة (عدلها إلى ما تريد)
+    // 🔑 كلمة السر
     const PASSWORD = "admin123";
 
     function checkPassword() {
-        const input = document.getElementById('passwordInput').value;
-        if (input === PASSWORD) {
+        if (document.getElementById('passwordInput').value === PASSWORD) {
             document.getElementById('loginBox').style.display = 'none';
             document.getElementById('adminPanel').style.display = 'block';
+            loadAppsFromStorage();
         } else {
             document.getElementById('errorMsg').style.display = 'block';
         }
     }
 
-    // إضافة التطبيقات (نفس الكود السابق)
-    let apps = [];
-    fetch('apps.json')
-        .then(res => res.json())
-        .then(data => { apps = data; })
-        .catch(() => { apps = []; });
+    // تحميل التطبيقات من المتصفح
+    function loadAppsFromStorage() {
+        let apps = JSON.parse(localStorage.getItem('myApps')) || [];
+        const list = document.getElementById('appList');
+        if (apps.length === 0) {
+            list.innerHTML = 'لا توجد تطبيقات حالياً.';
+        } else {
+            list.innerHTML = apps.map((app, index) => `
+                <div style="border-bottom: 1px solid #ddd; padding: 5px 0;">
+                    <strong>${app.name}</strong> 
+                    <button onclick="deleteApp(${index})" style="background:#dc3545; color:white; border:none; border-radius:4px; padding:2px 8px; float:left;">حذف</button>
+                </div>
+            `).join('');
+        }
+    }
 
+    // إضافة تطبيق
     document.getElementById('appForm').addEventListener('submit', function(e) {
         e.preventDefault();
+        let apps = JSON.parse(localStorage.getItem('myApps')) || [];
         const newApp = {
             name: document.getElementById('appName').value,
             image: document.getElementById('appImage').value,
@@ -66,18 +81,21 @@
             desc: document.getElementById('appDesc').value
         };
         apps.push(newApp);
-        const dataStr = JSON.stringify(apps, null, 2);
-        const blob = new Blob([dataStr], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'apps.json';
-        a.click();
-        URL.revokeObjectURL(url);
-        alert('✅ تم إضافة التطبيق! تم تنزيل ملف apps.json الجديد.');
+        localStorage.setItem('myApps', JSON.stringify(apps));
+        alert('✅ تم إضافة التطبيق! سيظهر مباشرة للزوار.');
+        loadAppsFromStorage();
         this.reset();
     });
-</script>
 
+    // حذف تطبيق
+    function deleteApp(index) {
+        if (confirm('هل أنت متأكد؟')) {
+            let apps = JSON.parse(localStorage.getItem('myApps')) || [];
+            apps.splice(index, 1);
+            localStorage.setItem('myApps', JSON.stringify(apps));
+            loadAppsFromStorage();
+        }
+    }
+</script>
 </body>
 </html>
