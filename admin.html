@@ -2,20 +2,20 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>لوحة التحكم (تلقائي)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة التحكم</title>
     <style>
         body { font-family: Arial; text-align: center; padding: 20px; background: #e9ecef; }
         .container { max-width: 500px; margin: auto; background: white; padding: 30px; border-radius: 12px; }
         input, textarea { width: 100%; padding: 10px; margin: 8px 0; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
         button { padding: 12px 24px; background: #28a745; color: white; border: none; border-radius: 6px; cursor: pointer; }
-        .back-link { display: block; margin-top: 20px; color: #007bff; text-decoration: none; }
         #loginBox { display: block; }
         #adminPanel { display: none; }
+        #statusMsg { margin-top: 10px; font-weight: bold; }
     </style>
 </head>
 <body>
 
-<!-- 🔐 شاشة تسجيل الدخول -->
 <div id="loginBox" class="container">
     <h2>🔐 تسجيل الدخول</h2>
     <input type="password" id="passwordInput" placeholder="أدخل كلمة السر">
@@ -23,79 +23,76 @@
     <p id="errorMsg" style="color: red; display: none;">❌ كلمة السر خطأ</p>
 </div>
 
-<!-- 🔧 لوحة التحكم -->
 <div id="adminPanel" class="container">
-    <h2>🔧 لوحة التحكم (إضافة فورية)</h2>
+    <h2>🔧 إضافة تطبيق جديد</h2>
     <form id="appForm">
         <input type="text" id="appName" placeholder="اسم التطبيق" required>
         <input type="text" id="appImage" placeholder="رابط الصورة" required>
         <input type="text" id="appLink" placeholder="رابط التحميل" required>
         <textarea id="appDesc" placeholder="وصف التطبيق" rows="3" required></textarea>
-        <button type="submit">➕ إضافة التطبيق (سيظهر فوراً)</button>
+        <button type="submit">➕ إضافة التطبيق</button>
     </form>
-    
-    <h3>📋 التطبيقات الحالية (مخزنة في المتصفح)</h3>
-    <div id="appList" style="text-align: right; background: #f8f9fa; padding: 10px; border-radius: 6px;"></div>
-
-    <a href="https://seifseif7dz-del.github.io/hki/market.html" target="_blank" class="back-link">🏠 العودة للموقع</a>
+    <p id="statusMsg"></p>
 </div>
 
 <script>
     // 🔑 كلمة السر
     const PASSWORD = "admin123";
 
+    // 🔴 الرابط والمفتاح الخاص بـ JSONBin (تم وضعهما لك)
+    const BIN_URL = "https://api.jsonbin.io/v3/b/6a529722f5f4af5e2981d9f7";
+    const MASTER_KEY = "$2a$10$C7krYp89.bjcE1rrn9Et9OJVNxe.kWMf71Sc5RYq89Urw3yYb4I0y";
+
     function checkPassword() {
         if (document.getElementById('passwordInput').value === PASSWORD) {
             document.getElementById('loginBox').style.display = 'none';
             document.getElementById('adminPanel').style.display = 'block';
-            loadAppsFromStorage();
         } else {
             document.getElementById('errorMsg').style.display = 'block';
         }
     }
 
-    // تحميل التطبيقات من المتصفح
-    function loadAppsFromStorage() {
-        let apps = JSON.parse(localStorage.getItem('myApps')) || [];
-        const list = document.getElementById('appList');
-        if (apps.length === 0) {
-            list.innerHTML = 'لا توجد تطبيقات حالياً.';
-        } else {
-            list.innerHTML = apps.map((app, index) => `
-                <div style="border-bottom: 1px solid #ddd; padding: 5px 0;">
-                    <strong>${app.name}</strong> 
-                    <button onclick="deleteApp(${index})" style="background:#dc3545; color:white; border:none; border-radius:4px; padding:2px 8px; float:left;">حذف</button>
-                </div>
-            `).join('');
-        }
-    }
-
-    // إضافة تطبيق
     document.getElementById('appForm').addEventListener('submit', function(e) {
         e.preventDefault();
-        let apps = JSON.parse(localStorage.getItem('myApps')) || [];
+        const status = document.getElementById('statusMsg');
+        status.style.color = "blue";
+        status.innerHTML = "⏳ جاري الحفظ في السحابة...";
+        
         const newApp = {
             name: document.getElementById('appName').value,
             image: document.getElementById('appImage').value,
             link: document.getElementById('appLink').value,
             desc: document.getElementById('appDesc').value
         };
-        apps.push(newApp);
-        localStorage.setItem('myApps', JSON.stringify(apps));
-        alert('✅ تم إضافة التطبيق! سيظهر مباشرة للزوار.');
-        loadAppsFromStorage();
-        this.reset();
-    });
 
-    // حذف تطبيق
-    function deleteApp(index) {
-        if (confirm('هل أنت متأكد؟')) {
-            let apps = JSON.parse(localStorage.getItem('myApps')) || [];
-            apps.splice(index, 1);
-            localStorage.setItem('myApps', JSON.stringify(apps));
-            loadAppsFromStorage();
-        }
-    }
+        // 1. جلب التطبيقات الحالية
+        fetch(BIN_URL)
+            .then(res => res.json())
+            .then(data => {
+                let apps = data.record.apps || [];
+                apps.push(newApp);
+                
+                // 2. رفع القائمة الجديدة
+                return fetch(BIN_URL, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Master-Key': MASTER_KEY
+                    },
+                    body: JSON.stringify({ apps: apps })
+                });
+            })
+            .then(() => {
+                status.style.color = "green";
+                status.innerHTML = "✅ تم الحفظ! التطبيق سيظهر للجميع فوراً.";
+                document.getElementById('appForm').reset();
+            })
+            .catch(() => {
+                status.style.color = "red";
+                status.innerHTML = "❌ فشل الحفظ. تحقق من اتصالك بالإنترنت.";
+            });
+    });
 </script>
+
 </body>
 </html>
