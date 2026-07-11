@@ -1,1 +1,8 @@
-[]
+[
+  {
+    "name": "VLC Media Player",
+    "image": "https://upload.wikimedia.org/wikipedia/commons/6/6a/VLC_icon.png",
+    "link": "https://www.videolan.org/vlc",
+    "desc": "هو مشغل صوت "
+  }
+]
