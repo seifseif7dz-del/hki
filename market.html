@@ -39,25 +39,35 @@
 <a href="admin.html" class="admin-btn">🔧 لوحة التحكم</a>
 
 <script>
-    // قراءة التطبيقات المخزنة في متصفح الزائر مباشرة (بدون رفع ملفات)
-    const apps = JSON.parse(localStorage.getItem('myApps')) || [];
-    const container = document.getElementById('app-container');
+    // 🔴 الرابط الخاص بـ JSONBin (تم وضعه لك)
+    const BIN_URL = "https://api.jsonbin.io/v3/b/6a529722f5f4af5e2981d9f7";
     
-    if (apps.length === 0) {
-        container.innerHTML = '<p style="color: #666; padding: 20px;">📭 لا توجد تطبيقات حالياً. أضف تطبيقاً من لوحة التحكم.</p>';
-    } else {
-        apps.forEach(app => {
-            const card = document.createElement('div');
-            card.className = 'app-card';
-            card.innerHTML = `
-                <img src="${app.image}" alt="${app.name}" onerror="this.src='https://via.placeholder.com/80x80?text=App'">
-                <h3>${app.name}</h3>
-                <p style="color: #666; font-size: 14px; height: 50px; overflow: hidden;">${app.desc}</p>
-                <a href="${app.link}" target="_blank">تحميل</a>
-            `;
-            container.appendChild(card);
+    fetch(BIN_URL)
+        .then(res => res.json())
+        .then(data => {
+            // جلب التطبيقات من داخل الملف
+            const apps = data.record.apps || [];
+            const container = document.getElementById('app-container');
+            
+            if (apps.length === 0) {
+                container.innerHTML = '<p style="color: #666; padding: 20px;">📭 لا توجد تطبيقات حالياً. أضف تطبيقاً من لوحة التحكم.</p>';
+            } else {
+                apps.forEach(app => {
+                    const card = document.createElement('div');
+                    card.className = 'app-card';
+                    card.innerHTML = `
+                        <img src="${app.image}" alt="${app.name}" onerror="this.src='https://via.placeholder.com/80x80?text=App'">
+                        <h3>${app.name}</h3>
+                        <p style="color: #666; font-size: 14px; height: 50px; overflow: hidden;">${app.desc}</p>
+                        <a href="${app.link}" target="_blank">تحميل</a>
+                    `;
+                    container.appendChild(card);
+                });
+            }
+        })
+        .catch(() => {
+            document.getElementById('app-container').innerHTML = '<p style="color:red;">⚠️ خطأ في الاتصال بالسحابة</p>';
         });
-    }
 </script>
 
 </body>
